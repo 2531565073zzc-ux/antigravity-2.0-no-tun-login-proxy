@@ -1,0 +1,47 @@
+{
+  "fake_ip": {
+    "cidr": "198.18.0.0/15",
+    "enabled": true
+  },
+  "_version": "antigravity-2.0-no-tun",
+  "_comment": "Antigravity 2.0 / 2.0.1 No-TUN login proxy config. Change proxy.port to your local proxy port if needed.",
+  "_proxy_core": "based-on-antigravity-proxy",
+  "traffic_logging": false,
+  "target_processes": [
+    "language_server_windows",
+    "language_server.exe",
+    "Antigravity.exe",
+    "node.exe"
+  ],
+  "proxy_rules": {
+    "allowed_ports": [
+      80,
+      443
+    ],
+    "udp_fallback": "block",
+    "ipv6_mode": "proxy",
+    "routing": {
+      "rules": [],
+      "use_default_private": true,
+      "default_action": "proxy",
+      "enabled": true,
+      "priority_mode": "order"
+    },
+    "udp_mode": "block",
+    "dns_mode": "direct"
+  },
+  "child_injection_mode": "filtered",
+  "timeout": {
+    "recv": 5000,
+    "connect": 5000,
+    "send": 5000
+  },
+  "log_level": "info",
+  "child_injection": true,
+  "proxy": {
+    "port": 7897,
+    "type": "socks5",
+    "host": "127.0.0.1"
+  },
+  "child_injection_exclude": []
+}
