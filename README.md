@@ -1,7 +1,10 @@
-# Antigravity 2.0 No-TUN Login Proxy Fix
+# 🚀 Antigravity 2.0 No-TUN Login Proxy Fix
 
-> 针对 Antigravity 2.0 / 2.0.1 的无 TUN 登录代理修复方案。  
-> 重点解决：不开 TUN 模式时，Antigravity 登录页、Agent 初始化、`daily-cloudcode-pa.googleapis.com` 请求超时的问题。
+> 针对 Antigravity 2.0 / 2.0.1 的无 TUN、无需 Proxifier 登录代理修复方案。  
+> 重点解决：不开 TUN 模式、不使用 Proxifier 时，Antigravity 登录页、Agent 初始化、`daily-cloudcode-pa.googleapis.com` 请求超时的问题。
+
+> ⚠️ **仅适用于 Windows x64。**  
+> 本方案依赖 Windows 下的 `version.dll` 加载机制和 Antigravity Windows 桌面程序目录结构。当前仓库提供的 `version.dll` 面向 Windows x64，其他环境如 macOS、Linux、WSL 内部程序或 32 位 Windows 程序暂未测试，是否可用尚不确定。
 
 作者 GitHub：
 
@@ -12,37 +15,38 @@
 [yuaotian/antigravity-proxy](https://github.com/yuaotian/antigravity-proxy)
 
 
-本仓库已经提供待配置文件：
+本仓库已经提供可直接使用的待配置文件：
 
 ```text
 version.dll
 config.json
 ```
 
-用户只需要从本仓库拿到这两个文件（Release 页面下载文件），按本文步骤复制到 Antigravity 安装目录即可。
+用户只需要从本仓库拿到这两个文件，按本文步骤复制到 Antigravity 安装目录即可。  
+如果你的代理端口不是默认的 `7897`，只需要修改 `config.json` 里的 `proxy.port`。
 
 ---
 
-## 文档导航
+## 📌 文档导航
 
-- [这个方案解决什么](#这个方案解决什么)
-- [适合哪些人使用](#适合哪些人使用)
-- [Antigravity 2.0 的关键变化](#antigravity-20-的关键变化)
-- [最核心的一行修复](#最核心的一行修复)
-- [本仓库提供的文件](#本仓库提供的文件)
-- [快速部署流程](#快速部署流程)
-- [推荐配置文件](#推荐配置文件)
-- [如何确认真的修好了](#如何确认真的修好了)
-- [不开 TUN 模式时的注意点](#不开-tun-模式时的注意点)
-- [常见失败原因](#常见失败原因)
-- [日志怎么看](#日志怎么看)
-- [进阶配置建议](#进阶配置建议)
-- [安全与公开发布提醒](#安全与公开发布提醒)
-- [声明与致谢](#声明与致谢)
+- [🎯 这个方案解决什么](#-这个方案解决什么)
+- [🪟 适用范围：仅 Windows x64](#-适用范围仅-windows-x64)
+- [🧩 Antigravity 2.0 的关键变化](#-antigravity-20-的关键变化)
+- [✅ 最核心的一行修复](#-最核心的一行修复)
+- [📦 本仓库提供的文件](#-本仓库提供的文件)
+- [⚡ 快速部署流程](#-快速部署流程)
+- [🧾 推荐配置文件](#-推荐配置文件)
+- [🔍 如何确认真的修好了](#-如何确认真的修好了)
+- [🚫 不开 TUN 模式时的注意点](#-不开-tun-模式时的注意点)
+- [🧯 常见失败原因](#-常见失败原因)
+- [📜 日志怎么看](#-日志怎么看)
+- [🛠️ 进阶配置建议](#️-进阶配置建议)
+- [🔐 安全与公开发布提醒](#-安全与公开发布提醒)
+- [🙏 声明与致谢](#-声明与致谢)
 
 ---
 
-## 这个方案解决什么
+## 🎯 这个方案解决什么
 
 很多用户在使用 Antigravity 2.0 时，会遇到登录页面卡住或 Agent 无法启动的问题。
 
@@ -80,13 +84,33 @@ Antigravity 2.0
 
 ---
 
-## 适合哪些人使用
+## 🪟 适用范围：仅 Windows x64
+
+本方案只面向 Windows 版 Antigravity。
+
+适用环境：
+
+- Windows 10 / Windows 11 x64
+- Antigravity 2.0 / 2.0.1 Windows x64 桌面版
+- Antigravity 默认或手动安装在 Windows 用户目录中
+- 本地代理客户端运行在 Windows 上
+- 本地代理端口形如 `127.0.0.1:7897`
+- 使用 `version.dll` 与 `Antigravity.exe` 同目录加载的方式
+
+不适用环境：
+
+- macOS
+- Linux 桌面环境
+- WSL 内部运行的程序
+- 32 位 Windows 程序
+- 浏览器插件代理
+- 只想配置 Git、npm、curl 等命令行代理的场景
 
 如果你符合下面任意一种情况，这份文档大概率适合你：
 
 - 你不想开启 TUN 模式
+- 你不想使用 Proxifier
 - 你只想让 Antigravity 走代理，不想全局接管网络
-- 你已经部署了 `antigravity-proxy`，但仍然无法登录
 - 你看到 `daily-cloudcode-pa.googleapis.com` 超时
 - 你使用的是 Antigravity 2.0 / 2.0.1
 - 你的代理端口是 `7897`、`7890`、`7891`、`10808` 等本地端口
@@ -101,7 +125,7 @@ Antigravity 2.0
 
 ---
 
-## Antigravity 2.0 的关键变化
+## 🧩 Antigravity 2.0 的关键变化
 
 Antigravity 2.0 不只是一个 `Antigravity.exe`。
 
@@ -154,7 +178,7 @@ context deadline exceeded
 
 ---
 
-## 最核心的一行修复
+## ✅ 最核心的一行修复
 
 在 `config.json` 的 `target_processes` 中加入：
 
@@ -187,7 +211,7 @@ context deadline exceeded
 
 ---
 
-## 本仓库提供的文件
+## 📦 本仓库提供的文件
 
 本仓库根目录提供两个核心文件：
 
@@ -241,7 +265,7 @@ C:\Users\<用户名>\AppData\Local\Programs\antigravity\config.json
 
 ---
 
-## 快速部署流程
+## ⚡ 快速部署流程
 
 以下示例使用本地代理端口：
 
@@ -251,7 +275,20 @@ C:\Users\<用户名>\AppData\Local\Programs\antigravity\config.json
 
 如果你的端口不是 `7897`，请替换成自己的实际端口。
 
-### 第一步：确认本地代理端口可用
+操作总览：
+
+```text
+1. 确认 Windows 本地代理端口可用
+2. 从本仓库拿到 version.dll 和 config.json
+3. 找到 Antigravity.exe 所在目录
+4. 把 version.dll 和 config.json 复制进去
+5. 按自己的代理端口修改 config.json
+6. 完全退出并重新打开 Antigravity
+7. 点击 Sign In
+8. 查看日志确认 language_server.exe 已走代理
+```
+
+### 1️⃣ 第一步：确认本地代理端口可用
 
 PowerShell 执行：
 
@@ -267,7 +304,7 @@ TcpTestSucceeded : True
 
 如果是 `False`，说明代理软件没有监听该端口，后续配置不会生效。
 
-### 第二步：获取本仓库文件
+### 2️⃣ 第二步：获取本仓库文件
 
 从本仓库获取下面两个文件：
 
@@ -304,7 +341,7 @@ version.dll
 config.json
 ```
 
-### 第三步：找到 Antigravity 安装目录
+### 3️⃣ 第三步：找到 Antigravity 安装目录
 
 默认路径一般是：
 
@@ -326,7 +363,7 @@ resources
 locales
 ```
 
-### 第四步：复制文件
+### 4️⃣ 第四步：复制文件
 
 把本仓库根目录中的两个文件复制到 Antigravity 安装目录：
 
@@ -345,7 +382,7 @@ C:\Users\<用户名>\AppData\Local\Programs\antigravity\config.json
 
 注意：`version.dll` 必须和 `Antigravity.exe` 在同一目录。
 
-### 第五步：修改 config.json
+### 5️⃣ 第五步：修改 config.json
 
 打开：
 
@@ -396,7 +433,7 @@ C:\Users\<用户名>\AppData\Local\Programs\antigravity\config.json
 ]
 ```
 
-### 第六步：完全重启 Antigravity
+### 6️⃣ 第六步：完全重启 Antigravity
 
 关闭 Antigravity 后，建议确认这些进程都已经退出：
 
@@ -414,7 +451,7 @@ node.exe
 
 旧的 `language_server.exe` 不会自动读取新配置，所以必须重启。
 
-### 第七步：点击 Sign In 并等待加载
+### 7️⃣ 第七步：点击 Sign In 并等待加载
 
 重新打开 Antigravity 后，进入登录页面，点击：
 
@@ -433,7 +470,7 @@ SOCKS5: 隧道建立成功, 目标=daily-cloudcode-pa.googleapis.com:443
 
 ---
 
-## 推荐配置文件
+## 🧾 推荐配置文件
 
 下面是针对 Antigravity 2.0、不开 TUN、本地 SOCKS5 端口为 `7897` 的推荐关键配置：
 
@@ -503,7 +540,7 @@ SOCKS5: 隧道建立成功, 目标=daily-cloudcode-pa.googleapis.com:443
 
 ---
 
-## 如何确认真的修好了
+## 🔍 如何确认真的修好了
 
 修复不是看页面是否立刻刷新，而是先看日志链路是否正确。
 
@@ -513,7 +550,7 @@ SOCKS5: 隧道建立成功, 目标=daily-cloudcode-pa.googleapis.com:443
 %LOCALAPPDATA%\Programs\antigravity\logs\proxy-YYYYMMDD.log
 ```
 
-### 1. 确认配置读取成功
+### ✅ 1. 确认配置读取成功
 
 应该看到：
 
@@ -527,7 +564,7 @@ SOCKS5: 隧道建立成功, 目标=daily-cloudcode-pa.googleapis.com:443
 配置加载成功
 ```
 
-### 2. 确认目标进程数量变为 4
+### ✅ 2. 确认目标进程数量变为 4
 
 如果你加入了 `language_server.exe`，日志中应看到类似：
 
@@ -537,7 +574,7 @@ SOCKS5: 隧道建立成功, 目标=daily-cloudcode-pa.googleapis.com:443
 
 如果仍然是 3 项，说明安装目录中的 `config.json` 没有改对。
 
-### 3. 确认 language_server.exe 已注入
+### ✅ 3. 确认 language_server.exe 已注入
 
 正确日志：
 
@@ -553,7 +590,7 @@ SOCKS5: 隧道建立成功, 目标=daily-cloudcode-pa.googleapis.com:443
 
 如果看到“跳过”，说明 `target_processes` 仍然没有匹配。
 
-### 4. 确认 daily-cloudcode 走代理
+### ✅ 4. 确认 daily-cloudcode 走代理
 
 正确日志：
 
@@ -569,7 +606,7 @@ SOCKS5: 隧道建立成功, 目标=daily-cloudcode-pa.googleapis.com:443
 
 看到这两类日志，才说明 Antigravity 2.0 的登录 / Agent 关键请求已经真正通过代理。
 
-### 5. 确认语言服务初始化
+### ✅ 5. 确认语言服务初始化
 
 Antigravity 自己的语言服务日志在：
 
@@ -593,7 +630,7 @@ daily-cloudcode-pa.googleapis.com ... context deadline exceeded
 
 ---
 
-## 不开 TUN 模式时的注意点
+## 🚫 不开 TUN 模式时的注意点
 
 不开 TUN 模式时，代理客户端通常只提供本地端口，例如：
 
@@ -621,9 +658,9 @@ language_server.exe 是否被代理注入
 
 ---
 
-## 常见失败原因
+## 🧯 常见失败原因
 
-### 1. 只改了端口，没有加 language_server.exe
+### 1. 只改了端口，没有加 `language_server.exe`
 
 错误配置：
 
@@ -642,7 +679,7 @@ language_server.exe 被跳过
 daily-cloudcode-pa.googleapis.com 请求超时
 ```
 
-### 2. 只改了仓库里的 config.json，但没有覆盖安装目录
+### 2. 只改了仓库里的 `config.json`，但没有覆盖安装目录
 
 如果你只是修改了本仓库里的：
 
@@ -698,7 +735,7 @@ User location is not supported for the API use
 
 ---
 
-## 日志怎么看
+## 📜 日志怎么看
 
 建议按下面顺序看日志。
 
@@ -758,7 +795,7 @@ initialized server successfully
 
 ---
 
-## 进阶配置建议
+## 🛠️ 进阶配置建议
 
 ### 保持 filtered 模式
 
@@ -815,7 +852,7 @@ initialized server successfully
 
 ---
 
-## 安全与公开发布提醒
+## 🔐 安全与公开发布提醒
 
 如果你准备把排障过程发到 GitHub，不建议直接上传完整日志。
 
@@ -857,7 +894,7 @@ Authorization: Bearer ...
 
 ---
 
-## 声明与致谢
+## 🙏 声明与致谢
 
 本方案基于：
 
@@ -881,7 +918,7 @@ No-TUN 模式下必须确保 language_server.exe 被注入并走代理。
 
 ---
 
-## 最短总结
+## 🧠 最短总结
 
 不开 TUN 模式时，Antigravity 2.0 登录失败不一定是代理端口错了。
 
