@@ -313,7 +313,7 @@ version.dll
 config.json
 ```
 
-不需要再去其他仓库的 Release 页面下载。
+本仓库的 Release 页面下载。
 
 如果你是通过 GitHub 页面下载，可以点击仓库页面的：
 
